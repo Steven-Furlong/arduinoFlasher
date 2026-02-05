@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Button Box Recovery</title>
-    <script src="https://cdn.jsdelivr.net/npm/avrgirl-arduino@latest/dist/avrgirl-arduino.browser.min.js"></script>
+    <script src="avrgirl-arduino.browser.min.js"></script>
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 50px;">
     <h1>Button Box Recovery</h1>
@@ -18,39 +18,38 @@
         document.getElementById('flash').addEventListener('click', function() {
             var status = document.getElementById('status');
             
-            // This pulls the correct 'constructor' from the avrgirl-arduino library
+            // Checking both possible names for the library
             var Avrgirl = window.AvrgirlArduino || window.avrgirlArduino;
 
             if (!Avrgirl) {
-                status.innerText = "Error: Flashing engine not loaded. Check your internet.";
+                status.innerText = "Error: Library still not loading. Try a different browser.";
                 return;
             }
 
             var avrgirl = new Avrgirl({ board: 'leonardo' });
             status.innerText = "Connecting... select your device in the popup.";
 
-            // New Shopify URL logic to bypass security blocks
+            // Pointing to the .hex file you uploaded to GitHub
             var hexUrl = 'TruckSimV1.hex';
 
             fetch(hexUrl)
                 .then(response => {
-                    if (!response.ok) throw new Error('Shopify blocked the file download.');
+                    if (!response.ok) throw new Error('Could not find the firmware file on the server.');
                     return response.arrayBuffer();
                 })
                 .then(buffer => {
-                    status.innerText = "File loaded. Checking for device...";
+                    status.innerText = "File loaded. Searching for device...";
                     
                     avrgirl.flash(buffer, function(err) {
                         if (err) {
                             status.innerText = "Error: " + err.message;
-                            console.error(err);
                         } else {
                             status.innerText = "SUCCESS! Your box has been updated.";
                         }
                     });
                 })
                 .catch(err => {
-                    status.innerText = "Error: " + err.message + " (Try right-clicking the button and opening in a New Tab)";
+                    status.innerText = "Error: " + err.message;
                 });
         });
     </script>
