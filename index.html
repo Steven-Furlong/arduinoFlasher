@@ -1,56 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Button Box Recovery</title>
-    <script src="https://cdn.jsdelivr.net/npm/avrgirl-arduino@latest/dist/avrgirl-arduino.browser.min.js"></script>
-</head>
-<body style="font-family: sans-serif; text-align: center; padding: 50px;">
-    <h1>Button Box Recovery</h1>
-    <p>Plug in your box and click the button below. No buttons to press!</p>
-    
-    <button id="flash" style="background: #008060; color: white; padding: 20px; border-radius: 10px; font-size: 20px; cursor: pointer; border: none;">
-        REPAIR MY BUTTON BOX
-    </button>
+<script>
+    document.getElementById('flash').addEventListener('click', function() {
+        var status = document.getElementById('status');
+        
+        // Change the "A" to lowercase "a" and "G" to lowercase "g" 
+        // to match exactly how the library is written: avrgirlArduino
+        if (typeof avrgirlArduino === 'undefined') {
+            status.innerText = "Error: Flashing library failed to load.";
+            return;
+        }
 
-    <p id="status" style="margin-top: 20px; font-weight: bold; color: #555;">Status: Ready</p>
+        var avrgirl = new avrgirlArduino({ board: 'leonardo' });
+        status.innerText = "Connecting... Please wait.";
 
-    <script>
-        document.getElementById('flash').addEventListener('click', function() {
-            var status = document.getElementById('status');
-            
-            // 1. Check if the library actually loaded
-            if (typeof AvrgirlArduino === 'undefined') {
-                status.innerText = "Error: Flashing library failed to load. Please refresh the page or use Chrome/Edge.";
-                return;
-            }
+        var hexUrl = 'https://cdn.shopify.com/s/files/1/0793/6956/8485/files/TruckSimV1.hex?v=1770316477';
 
-            var avrgirl = new AvrgirlArduino({ board: 'leonardo' });
-            status.innerText = "Connecting... Please wait.";
-
-            var hexUrl = 'https://cdn.shopify.com/s/files/1/0793/6956/8485/files/TruckSimV1.hex?v=1770316477';
-
-            // 2. Fetch the file with CORS safety
-            fetch(hexUrl, { mode: 'cors' })
-                .then(response => {
-                    if (!response.ok) throw new Error('Could not download firmware file from Shopify.');
-                    return response.arrayBuffer();
-                })
-                .then(buffer => {
-                    status.innerText = "Device found! Flashing now... do not unplug.";
-                    
-                    avrgirl.flash(buffer, function(err) {
-                        if (err) {
-                            status.innerText = "Error: " + err.message;
-                            console.error(err);
-                        } else {
-                            status.innerText = "DONE! Your TruckSim Box is ready.";
-                        }
-                    });
-                })
-                .catch(err => {
-                    status.innerText = "Error: " + err.message;
+        fetch(hexUrl, { mode: 'cors' })
+            .then(response => {
+                if (!response.ok) throw new Error('Could not download firmware file.');
+                return response.arrayBuffer();
+            })
+            .then(buffer => {
+                status.innerText = "Device found! Flashing now... do not unplug.";
+                
+                avrgirl.flash(buffer, function(err) {
+                    if (err) {
+                        status.innerText = "Error: " + err.message;
+                    } else {
+                        status.innerText = "DONE! Your TruckSim Box is ready.";
+                    }
                 });
-        });
-    </script>
-</body>
-</html>
+            })
+            .catch(err => {
+                status.innerText = "Error: " + err.message;
+            });
+    });
+</script>
