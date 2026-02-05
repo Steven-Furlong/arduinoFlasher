@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Box Recovery</title>
+    <script src="https://unpkg.com/avrgirl-arduino/dist/avrgirl-arduino.browser.min.js"></script>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 50px;">
+    <h1>Button Box Recovery</h1>
+    <p>Plug in your box and click the button below. No buttons to press!</p>
+    
+    <button id="flash" style="background: #008060; color: white; padding: 20px; border-radius: 10px; font-size: 20px; cursor: pointer; border: none;">
+        REPAIR MY BUTTON BOX
+    </button>
+
+    <p id="status" style="margin-top: 20px; font-weight: bold; color: #555;">Status: Ready</p>
+
+    <script>
+        document.getElementById('flash').addEventListener('click', function() {
+            var avrgirl = new AvrgirlArduino({ board: 'leonardo' });
+            var status = document.getElementById('status');
+            
+            status.innerText = "Connecting... Please wait.";
+
+            // REPLACE THE URL BELOW WITH YOUR SHOPIFY FILE URL
+            var hexUrl = 'PASTE_YOUR_SHOPIFY_URL_HERE';
+
+            fetch(hexUrl).then(response => response.arrayBuffer()).then(buffer => {
+                avrgirl.flash(buffer, function(err) {
+                    if (err) {
+                        status.innerText = "Error: " + err.message;
+                    } else {
+                        status.innerText = "DONE! You can unplug now.";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
