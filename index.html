@@ -21,8 +21,8 @@
             
             status.innerText = "Connecting... Please wait.";
 
-            // REPLACE THE URL BELOW WITH YOUR SHOPIFY FILE URL
-            var hexUrl = 'PASTE_YOUR_SHOPIFY_URL_HERE';
+            // SHOPIFY FILE URL
+            var hexUrl = 'https://cdn.shopify.com/s/files/1/0793/6956/8485/files/TruckSimV1.hex?v=1770316477';
 
             fetch(hexUrl).then(response => response.arrayBuffer()).then(buffer => {
                 avrgirl.flash(buffer, function(err) {
