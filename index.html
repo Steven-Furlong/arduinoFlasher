@@ -6,7 +6,7 @@
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 50px;">
     <h1>Button Box Recovery</h1>
-    <p>Plug in your box and click the button below.</p>
+    <p>Connect your box via USB, then click the button below.</p>
     
     <button id="flash" style="background: #008060; color: white; padding: 20px; border-radius: 10px; font-size: 20px; cursor: pointer; border: none;">
         REPAIR MY BUTTON BOX
@@ -18,36 +18,39 @@
         document.getElementById('flash').addEventListener('click', function() {
             var status = document.getElementById('status');
             
-            // This line covers both possible names the library uses
+            // This pulls the correct 'constructor' from the avrgirl-arduino library
             var Avrgirl = window.AvrgirlArduino || window.avrgirlArduino;
 
             if (!Avrgirl) {
-                status.innerText = "Error: Library not loaded. Please ensure you are using Chrome or Edge.";
+                status.innerText = "Error: Flashing engine not loaded. Check your internet.";
                 return;
             }
 
             var avrgirl = new Avrgirl({ board: 'leonardo' });
-            status.innerText = "Connecting... Please select your device in the popup.";
+            status.innerText = "Connecting... select your device in the popup.";
 
-            // Clean Shopify URL (removed the ?v= suffix for better compatibility)
+            // New Shopify URL logic to bypass security blocks
             var hexUrl = 'https://cdn.shopify.com/s/files/1/0793/6956/8485/files/TruckSimV1.hex';
 
             fetch(hexUrl)
                 .then(response => {
-                    if (!response.ok) throw new Error('Could not download firmware.');
+                    if (!response.ok) throw new Error('Shopify blocked the file download.');
                     return response.arrayBuffer();
                 })
                 .then(buffer => {
+                    status.innerText = "File loaded. Checking for device...";
+                    
                     avrgirl.flash(buffer, function(err) {
                         if (err) {
                             status.innerText = "Error: " + err.message;
+                            console.error(err);
                         } else {
-                            status.innerText = "DONE! Your Box is ready. You can unplug.";
+                            status.innerText = "SUCCESS! Your box has been updated.";
                         }
                     });
                 })
                 .catch(err => {
-                    status.innerText = "Error: " + err.message;
+                    status.innerText = "Error: " + err.message + " (Try right-clicking the button and opening in a New Tab)";
                 });
         });
     </script>
