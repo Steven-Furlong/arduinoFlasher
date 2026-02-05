@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Button Box Recovery</title>
-    <script src="https://unpkg.com/avrgirl-arduino/dist/avrgirl-arduino.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/avrgirl-arduino@latest/dist/avrgirl-arduino.browser.min.js"></script>
 </head>
 <body style="font-family: sans-serif; text-align: center; padding: 50px;">
     <h1>Button Box Recovery</h1>
@@ -16,23 +16,40 @@
 
     <script>
         document.getElementById('flash').addEventListener('click', function() {
-            var avrgirl = new AvrgirlArduino({ board: 'leonardo' });
             var status = document.getElementById('status');
             
+            // 1. Check if the library actually loaded
+            if (typeof AvrgirlArduino === 'undefined') {
+                status.innerText = "Error: Flashing library failed to load. Please refresh the page or use Chrome/Edge.";
+                return;
+            }
+
+            var avrgirl = new AvrgirlArduino({ board: 'leonardo' });
             status.innerText = "Connecting... Please wait.";
 
-            // SHOPIFY FILE URL
             var hexUrl = 'https://cdn.shopify.com/s/files/1/0793/6956/8485/files/TruckSimV1.hex?v=1770316477';
 
-            fetch(hexUrl).then(response => response.arrayBuffer()).then(buffer => {
-                avrgirl.flash(buffer, function(err) {
-                    if (err) {
-                        status.innerText = "Error: " + err.message;
-                    } else {
-                        status.innerText = "DONE! You can unplug now.";
-                    }
+            // 2. Fetch the file with CORS safety
+            fetch(hexUrl, { mode: 'cors' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Could not download firmware file from Shopify.');
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    status.innerText = "Device found! Flashing now... do not unplug.";
+                    
+                    avrgirl.flash(buffer, function(err) {
+                        if (err) {
+                            status.innerText = "Error: " + err.message;
+                            console.error(err);
+                        } else {
+                            status.innerText = "DONE! Your TruckSim Box is ready.";
+                        }
+                    });
+                })
+                .catch(err => {
+                    status.innerText = "Error: " + err.message;
                 });
-            });
         });
     </script>
 </body>
